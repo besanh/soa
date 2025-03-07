@@ -1,10 +1,12 @@
 package main
 
 import (
+	v1 "github.com/besanh/soa/apis/v1"
 	"github.com/besanh/soa/common/env"
 	"github.com/besanh/soa/pkgs/sqlclient"
 	"github.com/besanh/soa/repositories"
 	"github.com/besanh/soa/servers"
+	"github.com/besanh/soa/services"
 	"github.com/joho/godotenv"
 )
 
@@ -51,9 +53,17 @@ func init() {
 func main() {
 	server := servers.NewServer()
 
+	productsCategoriesService := services.NewProductCategories()
+	v1.NewProductCategories(server.Engine, productsCategoriesService)
+	services.SECRET_KEY = env.GetStringENV("SECRET_KEY", "")
+
 	server.Start(config.Port)
 }
 
 func initRepository(sqlClientConfig sqlclient.SqlConfig) {
-	repositories.FusionSqlClient = sqlclient.NewSqlClient(sqlClientConfig)
+	repositories.PgSqlClient = sqlclient.NewSqlClient(sqlClientConfig)
+
+	repositories.ProductRepo = repositories.NewProducts()
+	repositories.ProductCategoryRepo = repositories.NewProductCategories()
+	repositories.SupplierRepo = repositories.NewSuppliers()
 }
