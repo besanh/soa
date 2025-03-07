@@ -1,0 +1,6 @@
+.vscode/*
+tmp/*
+.DS_Store
+__debug_bin
+app.exe
+.env
