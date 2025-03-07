@@ -110,10 +110,10 @@ func (repo *Products) Select(ctx context.Context, filter *models.ProductsQuery) 
 		})
 
 	if len(filter.ProductName) > 0 {
-		query.Where("? = ?", bun.Ident("product_name"), "%"+filter.ProductName+"%")
+		query.Where("? ILIKE ?", bun.Ident("product_name"), "%"+filter.ProductName+"%")
 	}
 	if len(filter.ProductReference) > 0 {
-		query.Where("? = ?", bun.Ident("product_reference"), filter.ProductReference)
+		query.Where("? ILIKE ?", bun.Ident("product_reference"), filter.ProductReference)
 	}
 	if len(filter.FromDateCreated) > 0 {
 		query.Where("date_created >= ?", filter.FromDateCreated)
@@ -122,7 +122,7 @@ func (repo *Products) Select(ctx context.Context, filter *models.ProductsQuery) 
 		query.Where("date_created <= ?", filter.ToDateCreated)
 	}
 	if len(filter.Status) > 0 {
-		query.Where("status = IN (?)", bun.In(filter.Status))
+		query.Where("status IN (?)", bun.In(filter.Status))
 	}
 	if len(filter.FromPrice) > 0 {
 		price, _ := strconv.Atoi(filter.FromPrice)
@@ -168,7 +168,6 @@ func (repo *Products) Select(ctx context.Context, filter *models.ProductsQuery) 
 		sortValue = "ASC"
 	}
 	query.OrderExpr(orderValue + " " + sortValue)
-
 	total, err := query.ScanAndCount(ctx)
 	if err != nil {
 		return 0, nil, err
@@ -198,10 +197,10 @@ func (repo *Products) SelectScroll(ctx context.Context, filter *models.ProductsQ
 		})
 
 	if len(filter.ProductName) > 0 {
-		query.Where("? = ?", bun.Ident("product_name"), "%"+filter.ProductName+"%")
+		query.Where("? ILIKE ?", bun.Ident("product_name"), "%"+filter.ProductName+"%")
 	}
 	if len(filter.ProductReference) > 0 {
-		query.Where("? = ?", bun.Ident("product_reference"), filter.ProductReference)
+		query.Where("? ILIKE ?", bun.Ident("product_reference"), filter.ProductReference)
 	}
 	if len(filter.FromDateCreated) > 0 {
 		query.Where("date_created >= ?", filter.FromDateCreated)
@@ -210,7 +209,7 @@ func (repo *Products) SelectScroll(ctx context.Context, filter *models.ProductsQ
 		query.Where("date_created <= ?", filter.ToDateCreated)
 	}
 	if len(filter.Status) > 0 {
-		query.Where("status = IN (?)", bun.In(filter.Status))
+		query.Where("status IN (?)", bun.In(filter.Status))
 	}
 	if len(filter.FromPrice) > 0 {
 		price, _ := strconv.Atoi(filter.FromPrice)
@@ -253,12 +252,8 @@ func (repo *Products) SelectScroll(ctx context.Context, filter *models.ProductsQ
 
 func (repo *Products) SelectById(ctx context.Context, id string) (result models.ProductsResponse, err error) {
 	query := PgSqlClient.GetDB().NewSelect().Model(&result).
-		Relation("ProductCategory", func(sq *bun.SelectQuery) *bun.SelectQuery {
-			return sq.Where("status = ?", "active")
-		}).
-		Relation("Supplier", func(sq *bun.SelectQuery) *bun.SelectQuery {
-			return sq.Where("status = ?", "active")
-		})
+		Relation("ProductCategory").
+		Relation("Supplier")
 
 	err = query.Where("id = ?", id).Scan(ctx)
 	if err != nil {

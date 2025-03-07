@@ -76,6 +76,7 @@ func (p *Products) Insert(ctx context.Context, data *models.ProductsRequest) err
 	product := &models.Products{
 		ProductId:         uuid.NewString(),
 		ProductName:       data.ProductName,
+		ProductReference:  data.ProductReference,
 		Price:             data.Price,
 		Status:            data.Status,
 		DateCreated:       time.Now().Format("2006-01-02"),
@@ -107,6 +108,7 @@ func (p *Products) Update(ctx context.Context, id string, data *models.ProductsR
 
 	product := &models.Products{
 		ProductId:         id,
+		ProductReference:  data.ProductReference,
 		ProductName:       data.ProductName,
 		Price:             data.Price,
 		Status:            data.Status,
@@ -178,20 +180,22 @@ func (p *Products) SelectScroll(ctx context.Context, query *models.ProductsQuery
 }
 
 func (p *Products) ExportPdf(ctx context.Context, query *models.ProductsQuery) (*gofpdf.Fpdf, error) {
+	// Retrieve products using your repository
 	products, err := repositories.ProductRepo.SelectScroll(ctx, query)
 	if err != nil {
 		return nil, err
 	}
 
-	pdf := gofpdf.New("P", "mm", "A4", "")
+	// Create a new PDF document in Landscape orientation for more horizontal space.
+	pdf := gofpdf.New("L", "mm", "A4", "")
 	pdf.AddPage()
 
-	// Title.
+	// Title
 	pdf.SetFont("Arial", "B", 16)
 	pdf.Cell(40, 10, "Product Information")
 	pdf.Ln(12)
 
-	// Table header.
+	// Table header
 	pdf.SetFont("Arial", "B", 12)
 	pdf.CellFormat(10, 10, "#", "1", 0, "C", false, 0, "")
 	pdf.CellFormat(80, 10, "Product Reference", "1", 0, "C", false, 0, "")
@@ -205,19 +209,19 @@ func (p *Products) ExportPdf(ctx context.Context, query *models.ProductsQuery) (
 	pdf.CellFormat(80, 10, "Available Quantity", "1", 0, "C", false, 0, "")
 	pdf.Ln(-1)
 
-	// Table rows.
+	// Table rows
 	pdf.SetFont("Arial", "", 12)
-	for i, p := range products {
+	for i, prod := range products {
 		pdf.CellFormat(10, 10, strconv.Itoa(i+1), "1", 0, "C", false, 0, "")
-		pdf.CellFormat(80, 10, p.ProductReference, "1", 0, "L", false, 0, "")
-		pdf.CellFormat(80, 10, p.ProductName, "1", 0, "L", false, 0, "")
-		pdf.CellFormat(80, 10, p.DateCreated, "1", 0, "C", false, 0, "")
-		pdf.CellFormat(80, 10, p.Status, "1", 0, "C", false, 0, "")
-		pdf.CellFormat(80, 10, p.ProductCategory.ProductCategoryName, "1", 0, "L", false, 0, "")
-		pdf.CellFormat(80, 10, strconv.FormatInt(p.Price, 10), "1", 0, "R", false, 0, "")
-		pdf.CellFormat(80, 10, p.StockLocation, "1", 0, "L", false, 0, "")
-		pdf.CellFormat(80, 10, p.Supplier.SupplierName, "1", 0, "L", false, 0, "")
-		pdf.CellFormat(80, 10, strconv.Itoa(p.Quantity), "1", 0, "C", false, 0, "")
+		pdf.CellFormat(80, 10, prod.ProductReference, "1", 0, "L", false, 0, "")
+		pdf.CellFormat(80, 10, prod.ProductName, "1", 0, "L", false, 0, "")
+		pdf.CellFormat(80, 10, prod.DateCreated, "1", 0, "C", false, 0, "")
+		pdf.CellFormat(80, 10, prod.Status, "1", 0, "C", false, 0, "")
+		pdf.CellFormat(80, 10, prod.ProductCategory.ProductCategoryName, "1", 0, "L", false, 0, "")
+		pdf.CellFormat(80, 10, strconv.FormatInt(prod.Price, 10), "1", 0, "R", false, 0, "")
+		pdf.CellFormat(80, 10, prod.StockLocation, "1", 0, "L", false, 0, "")
+		pdf.CellFormat(80, 10, prod.Supplier.SupplierName, "1", 0, "L", false, 0, "")
+		pdf.CellFormat(80, 10, strconv.Itoa(prod.Quantity), "1", 0, "C", false, 0, "")
 		pdf.Ln(-1)
 	}
 
