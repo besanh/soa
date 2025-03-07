@@ -24,11 +24,9 @@ var SupplierRepo ISuppliers
 
 func NewSuppliers() ISuppliers {
 	repo := &Suppliers{}
-	go func() {
-		repo.initTable()
-		repo.initColumns()
-		repo.initIndexes()
-	}()
+	repo.initTable()
+	repo.initColumns()
+	repo.initIndexes()
 	return repo
 }
 
@@ -47,16 +45,16 @@ func (repo *Suppliers) initColumns() {
 }
 
 func (repo *Suppliers) initIndexes() {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-	defer cancel()
+	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	// defer cancel()
 
-	if _, err := PgSqlClient.GetDB().NewCreateIndex().Model((*models.Products)(nil)).IfNotExists().Index("idx_suppliers_combination").Column("supplier_name", "status").Exec(ctx); err != nil {
-		panic(err)
-	}
+	// if _, err := PgSqlClient.GetDB().NewCreateIndex().Model((*models.Suppliers)(nil)).IfNotExists().Index("idx_suppliers_combination").Column("supplier_name", "status").Exec(ctx); err != nil {
+	// 	panic(err)
+	// }
 }
 
 func (repo *Suppliers) Insert(ctx context.Context, data *models.Suppliers) error {
-	resp, err := PgSqlClient.GetDB().NewInsert().Model(&data).Exec(ctx)
+	resp, err := PgSqlClient.GetDB().NewInsert().Model(data).Exec(ctx)
 	if err != nil {
 		return err
 	} else if affected, _ := resp.RowsAffected(); affected < 1 {
@@ -66,7 +64,7 @@ func (repo *Suppliers) Insert(ctx context.Context, data *models.Suppliers) error
 }
 
 func (repo *Suppliers) Update(ctx context.Context, data *models.Suppliers) error {
-	query := PgSqlClient.GetDB().NewUpdate().Model(&data).
+	query := PgSqlClient.GetDB().NewUpdate().Model(data).
 		Where("supplier_id = ?", data.SupplierId)
 	res, err := query.Exec(ctx)
 	if err != nil {

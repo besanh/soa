@@ -9,9 +9,9 @@ import (
 
 type (
 	Suppliers struct {
-		bun.BaseModel `bun:"suppliers,alias:s"`
+		bun.BaseModel `bun:"supplier,alias:sp"`
 		SupplierId    string `json:"supplier_id" bun:"supplier_id,pk,type:uuid,notnull"`
-		SupplierName  string `json:"supplier_name" bun:"supplier_name,type:varchar(255),notnull"`
+		SupplierName  string `json:"supplier_name" bun:"supplier_name,type:varchar(100),notnull"`
 		Status        string `json:"status" bun:"status,type:varchar(25),notnull"`
 	}
 
@@ -21,7 +21,7 @@ type (
 	}
 
 	SuppliersResponse struct {
-		bun.BaseModel `bun:"suppliers,alias:s"`
+		bun.BaseModel `bun:"supplier,alias:sp"`
 		SupplierId    string `json:"supplier_id" bun:"supplier_id"`
 		SupplierName  string `json:"supplier_name" bun:"supplier_name"`
 		Status        string `json:"status" bun:"status"`

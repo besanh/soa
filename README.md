@@ -17,7 +17,8 @@
 
 ## Detailed steps to config and run api
 You copy .env_example to .env and write approriate configuration data to .env
-I provided secret key, so you only need to pass below field to .env file
+To save time, I offer use secret key to secure apis.
+So I provided secret key, so you only need to pass below field to .env file
 ```
 SECRET=8HsicGYxLnf9xNmFjF5WuRgu1VHwcktDLQIR6EPMs8kTwJlBgT
 ```
