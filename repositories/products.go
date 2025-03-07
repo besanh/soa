@@ -204,11 +204,13 @@ func (repo *Products) SelectScroll(ctx context.Context, filter *models.ProductsQ
 	}
 
 	if filter.Limit > 0 {
-		query.Limit(filter.Limit).Offset(filter.Offset)
+		query.Limit(filter.Limit)
 	}
 
 	query.Where("(created_at > ?) OR (created_at = ? AND id > ?)", filter.CreatedAt, filter.CreatedAt, filter.LastSeenId).
 		Order("created_at ASC, id ASC")
+
+	// I forgot order columns
 
 	err := query.Scan(ctx)
 	if err != nil {
