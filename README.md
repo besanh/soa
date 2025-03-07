@@ -13,10 +13,15 @@
 5. **models**: define structs
 6. **servers**: define server to run api
 7. **tmp**: include file log of this project
-8. **build**: bash to build source code
+8. **pkgs**: include all third party libraries
 
 ## Detailed steps to config and run api
-1. You copy .env_example to .env and write approriate configuration data to .env
+You copy .env_example to .env and write approriate configuration data to .env
+I provided secret key, so you only need to pass below field to .env file
+```
+SECRET=8HsicGYxLnf9xNmFjF5WuRgu1VHwcktDLQIR6EPMs8kTwJlBgT
+```
+
 ```
 # PostgreSQL
 PG_HOST=
@@ -26,21 +31,14 @@ PG_PASSWORD=
 PG_PORT=
 ```
 
-2. Use 2 below curls to test apis, run on your terminal or postman:
-
-
 Notice: you should replace <i><b>http://localhost:8000</b></i> with your domain api when you deployed on your server. If you run 2 curls on your local terminal, please skip this notice.
 
 
-3. Run source code
+Run source code
 
 You can run source code on your computer or your server:
 ```
 go run main.go
-```
-Or use file .exe:
-```
-./build/build.sh
 ```
 
 this command will exported app.exe file, helping you to deploy.
