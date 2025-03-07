@@ -8,8 +8,7 @@ import (
 	"github.com/uptrace/bun/schema"
 )
 
-var FusionSqlClient sqlclient.ISqlClientConn
-var FreeswitchSqlClient sqlclient.ISqlClientConn
+var PgSqlClient sqlclient.ISqlClientConn
 
 func CreateTableCollate(client sqlclient.ISqlClientConn, ctx context.Context, table any) error {
 	query := client.GetDB().NewCreateTable().Model(table).IfNotExists()

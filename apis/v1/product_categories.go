@@ -1,6 +1,7 @@
 package v1
 
 import (
+	api "github.com/besanh/soa/apis"
 	"github.com/besanh/soa/common/util"
 	"github.com/besanh/soa/models"
 	"github.com/besanh/soa/services"
@@ -16,7 +17,7 @@ func NewProductCategories(engine *gin.Engine, productCategoriesService services.
 		productCategoriesService: productCategoriesService,
 	}
 
-	group := engine.Group("v1/product-categories").Use(Validate())
+	group := engine.Group("v1/product-categories").Use(api.Validate())
 	{
 		group.POST("", handler.Insert)
 		group.PUT(":id", handler.Update)
