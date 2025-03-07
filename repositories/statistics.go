@@ -24,7 +24,7 @@ func NewStatisticsRepo() IStatistics {
 func (repo *Statistics) GetProductsPerCategory(ctx context.Context) ([]models.ProductsPerCategoryStat, error) {
 	result := new([]models.ProductsPerCategoryStat)
 	err := PgSqlClient.GetDB().NewSelect().
-		Model(&result).
+		Model(result).
 		ColumnExpr("pc.product_category_name as category, COUNT(*) as count").
 		TableExpr("products p JOIN product_categories pc ON p.product_category_id = pc.product_category_id").
 		Group("pc.product_category_name").
@@ -39,7 +39,7 @@ func (repo *Statistics) GetProductsPerCategory(ctx context.Context) ([]models.Pr
 func (repo *Statistics) GetProductsPerSupplier(ctx context.Context) ([]models.ProductsPerSupplierStat, error) {
 	result := new([]models.ProductsPerSupplierStat)
 	err := PgSqlClient.GetDB().NewSelect().
-		Model(&result).
+		Model(result).
 		ColumnExpr("s.supplier_name as supplier, COUNT(*) as count").
 		TableExpr("products p JOIN suppliers s ON p.supplier_id = s.supplier_id").
 		Group("s.supplier_name").
