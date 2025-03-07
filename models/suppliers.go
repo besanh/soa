@@ -37,7 +37,7 @@ type (
 )
 
 func (m *SuppliersRequest) Validate() error {
-	if m.SupplierName == "" {
+	if len(m.SupplierName) == 0 {
 		return errors.New("supplier name is required")
 	}
 	if !slices.Contains([]string{"active", "inactive"}, m.Status) {

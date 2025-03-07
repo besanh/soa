@@ -41,7 +41,7 @@ type (
 )
 
 func (m *ProductCategoriesRequest) Validate() error {
-	if m.ProductCategoryName == "" {
+	if len(m.ProductCategoryName) == 0 {
 		return errors.New("product category name is required")
 	}
 	if !slices.Contains([]string{"active", "inactive"}, m.Status) {

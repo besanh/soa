@@ -41,3 +41,13 @@ func ParseString(value any) string {
 	str = strings.TrimSpace(str)
 	return str
 }
+
+func ParseQueryArray(slice []string) []string {
+	result := make([]string, 0)
+	for _, v := range slice {
+		if len(v) > 0 {
+			result = append(result, v)
+		}
+	}
+	return result
+}

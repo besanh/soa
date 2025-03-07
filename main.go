@@ -57,8 +57,9 @@ func main() {
 	v1.NewProductCategories(server.Engine, productsCategoriesService)
 	services.SECRET_KEY = env.GetStringENV("SECRET_KEY", "")
 
-	suppliersService := services.NewSuppliers()
-	v1.NewSuppliers(server.Engine, suppliersService)
+	v1.NewSuppliers(server.Engine, services.NewSuppliers())
+
+	v1.NewProduct(server.Engine, services.NewProducts())
 
 	server.Start(config.Port)
 }
