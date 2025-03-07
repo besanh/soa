@@ -58,8 +58,8 @@ func main() {
 	services.SECRET_KEY = env.GetStringENV("SECRET_KEY", "")
 
 	v1.NewSuppliers(server.Engine, services.NewSuppliers())
-
 	v1.NewProduct(server.Engine, services.NewProducts())
+	v1.NewDistance(server.Engine, services.NewDistance())
 
 	server.Start(config.Port)
 }

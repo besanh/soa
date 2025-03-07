@@ -26,6 +26,7 @@ func NewProduct(engine *gin.Engine, productsService services.IProducts) {
 		group.DELETE(":id", handler.Delete)
 		group.GET("", handler.Select)
 		group.GET("scroll", handler.SelectScroll)
+		group.GET(":id", handler.SelectById)
 		group.POST("export-pdf", handler.ExportPdf)
 	}
 }
@@ -169,4 +170,13 @@ func (h *ProductsHandler) ExportPdf(ctx *gin.Context) {
 	if err := pdf.Output(ctx.Writer); err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
+}
+
+func (h *ProductsHandler) SelectById(ctx *gin.Context) {
+	result, err := h.productsService.SelectById(ctx, ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+	ctx.JSON(200, result)
 }

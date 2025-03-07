@@ -19,6 +19,7 @@ type (
 		Update(ctx context.Context, id string, data *models.ProductsRequest) error
 		Delete(ctx context.Context, id string) error
 		Select(ctx context.Context, query *models.ProductsQuery) (total int, result []models.ProductsResponse, err error)
+		SelectById(ctx context.Context, id string) (result models.ProductsResponse, err error)
 		SelectScroll(ctx context.Context, query *models.ProductsQuery) (result []models.ProductsResponse, err error)
 		ExportPdf(ctx context.Context, query *models.ProductsQuery) (*gofpdf.Fpdf, error)
 	}
@@ -176,4 +177,8 @@ func (p *Products) ExportPdf(ctx context.Context, query *models.ProductsQuery) (
 	}
 
 	return pdf, nil
+}
+
+func (p *Products) SelectById(ctx context.Context, id string) (result models.ProductsResponse, err error) {
+	return repositories.ProductRepo.SelectById(ctx, id)
 }

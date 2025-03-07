@@ -17,6 +17,7 @@ type (
 		Update(ctx context.Context, id string, product *models.Products) error
 		Delete(ctx context.Context, id string) error
 		Select(ctx context.Context, filter *models.ProductsQuery) (int, []models.ProductsResponse, error)
+		SelectById(ctx context.Context, id string) (result models.ProductsResponse, err error)
 		SelectScroll(ctx context.Context, query *models.ProductsQuery) (result []models.ProductsResponse, err error)
 	}
 
@@ -213,4 +214,23 @@ func (repo *Products) SelectScroll(ctx context.Context, filter *models.ProductsQ
 	}
 
 	return *result, nil
+}
+
+func (repo *Products) SelectById(ctx context.Context, id string) (result models.ProductsResponse, err error) {
+	query := PgSqlClient.GetDB().NewSelect().Model(&result).
+		Relation("ProductCategory", func(sq *bun.SelectQuery) *bun.SelectQuery {
+			return sq.Where("status = ?", "active")
+		}).
+		Relation("Supplier", func(sq *bun.SelectQuery) *bun.SelectQuery {
+			return sq.Where("status = ?", "active")
+		})
+
+	err = query.Where("id = ?", id).Scan(ctx)
+	if err != nil {
+		return models.ProductsResponse{}, err
+	} else if err == sql.ErrNoRows {
+		return models.ProductsResponse{}, nil
+	}
+
+	return result, nil
 }
