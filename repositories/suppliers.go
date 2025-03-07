@@ -47,7 +47,12 @@ func (repo *Suppliers) initColumns() {
 }
 
 func (repo *Suppliers) initIndexes() {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
 
+	if _, err := PgSqlClient.GetDB().NewCreateIndex().Model((*models.Products)(nil)).IfNotExists().Index("idx_suppliers_combination").Column("supplier_name", "status").Exec(ctx); err != nil {
+		panic(err)
+	}
 }
 
 func (repo *Suppliers) Insert(ctx context.Context, data *models.Suppliers) error {

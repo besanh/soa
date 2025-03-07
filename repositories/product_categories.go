@@ -47,7 +47,12 @@ func (repo *ProductCategoies) initColumns() {
 }
 
 func (repo *ProductCategoies) initIndexes() {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
 
+	if _, err := PgSqlClient.GetDB().NewCreateIndex().Model((*models.Products)(nil)).IfNotExists().Index("idx_product_categories_combination").Column("product_category_name", "status").Exec(ctx); err != nil {
+		panic(err)
+	}
 }
 
 func (repo *ProductCategoies) Insert(ctx context.Context, data *models.ProductCategories) error {

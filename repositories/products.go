@@ -50,17 +50,12 @@ func (repo *Products) initColumns() {
 }
 
 func (repo *Products) initIndexes() {
-	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-	// defer cancel()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
 
-	// indexes := []string{
-	// 	// Composite index on name and code.
-	// 	"CREATE INDEX IF NOT EXISTS idx_products_combination ON products(product_name, code)",
-	// }
-
-	// if _, err := PgSqlClient.GetDB().NewCreateIndex().Model((*models.Products)(nil)).IfNotExists().Index("idx_products_combination").Column("domain_uuid").Exec(ctx); err != nil {
-	// 	panic(err)
-	// }
+	if _, err := PgSqlClient.GetDB().NewCreateIndex().Model((*models.Products)(nil)).IfNotExists().Index("idx_products_combination").Column("product_name", "product_reference", "status", "date_created", "price", "quantity").Exec(ctx); err != nil {
+		panic(err)
+	}
 }
 
 func (repo *Products) Insert(ctx context.Context, data *models.Products) error {
