@@ -53,13 +53,15 @@ func init() {
 func main() {
 	server := servers.NewServer()
 
+	services.SECRET_KEY = env.GetStringENV("SECRET_KEY", "")
+
 	productsCategoriesService := services.NewProductCategories()
 	v1.NewProductCategories(server.Engine, productsCategoriesService)
-	services.SECRET_KEY = env.GetStringENV("SECRET_KEY", "")
 
 	v1.NewSuppliers(server.Engine, services.NewSuppliers())
 	v1.NewProduct(server.Engine, services.NewProducts())
 	v1.NewDistance(server.Engine, services.NewDistance())
+	v1.NewStatistics(server.Engine, services.NewStatistics())
 
 	server.Start(config.Port)
 }
@@ -70,4 +72,5 @@ func initRepository(sqlClientConfig sqlclient.SqlConfig) {
 	repositories.ProductRepo = repositories.NewProducts()
 	repositories.ProductCategoryRepo = repositories.NewProductCategories()
 	repositories.SupplierRepo = repositories.NewSuppliers()
+	repositories.StatisticsRepo = repositories.NewStatisticsRepo()
 }

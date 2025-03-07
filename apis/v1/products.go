@@ -94,6 +94,8 @@ func (h *ProductsHandler) Select(ctx *gin.Context) {
 		ToQuantity:        ctx.Query("to_quantity"),
 		Limit:             limit,
 		Offset:            offset,
+		Order:             ctx.Query("order"),
+		Sort:              ctx.Query("sort"),
 	}
 
 	total, result, err := h.productsService.Select(ctx, query)
@@ -126,18 +128,17 @@ func (h *ProductsHandler) SelectScroll(ctx *gin.Context) {
 		FromQuantity:      ctx.Query("from_quantity"),
 		ToQuantity:        ctx.Query("to_quantity"),
 		Limit:             limit,
+		Order:             ctx.Query("order"),
+		Sort:              ctx.Query("sort"),
 	}
 
-	total, result, err := h.productsService.Select(ctx, query)
+	result, err := h.productsService.SelectScroll(ctx, query)
 	if err != nil {
 		ctx.JSON(400, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.JSON(200, gin.H{
-		"total": total,
-		"data":  result,
-	})
+	ctx.JSON(200, result)
 }
 
 func (h *ProductsHandler) ExportPdf(ctx *gin.Context) {
@@ -158,6 +159,8 @@ func (h *ProductsHandler) ExportPdf(ctx *gin.Context) {
 		FromQuantity:      ctx.Query("from_quantity"),
 		ToQuantity:        ctx.Query("to_quantity"),
 		Limit:             limit,
+		Order:             ctx.Query("order"),
+		Sort:              ctx.Query("sort"),
 	}
 
 	pdf, err := h.productsService.ExportPdf(ctx, query)

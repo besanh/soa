@@ -9,7 +9,7 @@ import (
 
 type (
 	Products struct {
-		bun.BaseModel     `bun:"products,alias:p"`
+		bun.BaseModel     `bun:"product,alias:p"`
 		ProductId         string            `json:"product_id" bun:"product_id,pk,type:uuid,notnull"`
 		ProductName       string            `json:"product_name" bun:"product_name,type:varchar(255),notnull"`
 		ProductReference  string            `json:"product_reference" bun:"product_reference,type:varchar(255),notnull"`
@@ -36,17 +36,19 @@ type (
 	}
 
 	ProductsResponse struct {
-		bun.BaseModel    `bun:"products,alias:p"`
-		ProductId        string                     `json:"product_id" bun:"product_id"`
-		ProductName      string                     `json:"product_name" bun:"product_name"`
-		ProductReference string                     `json:"product_reference" bun:"product_reference"`
-		Status           string                     `json:"status" bun:"status"`
-		ProductCategory  *ProductCategoriesResponse `bun:"rel:belongs-to,join:product_category_id=product_category_id"`
-		Price            int64                      `json:"price" bun:"price"`
-		StockLocation    string                     `json:"stock_location" bun:"stock_location"`
-		Supplier         *SuppliersResponse         `bun:"rel:belongs-to,join:supplier_id=supplier_id"`
-		Quantity         int                        `json:"quantity" bun:"quantity"`
-		DateCreated      string                     `json:"date_created" bun:"date_created"`
+		bun.BaseModel     `bun:"product,alias:p"`
+		ProductId         string                     `json:"product_id" bun:"product_id,pk"`
+		ProductName       string                     `json:"product_name" bun:"product_name"`
+		ProductReference  string                     `json:"product_reference" bun:"product_reference"`
+		Status            string                     `json:"status" bun:"status"`
+		ProductCategoryId string                     `json:"product_category_id" bun:"product_category_id"`
+		ProductCategory   *ProductCategoriesResponse `bun:"rel:belongs-to,join:product_category_id=product_category_id"`
+		Price             int64                      `json:"price" bun:"price"`
+		StockLocation     string                     `json:"stock_location" bun:"stock_location"`
+		SupplierId        string                     `json:"supplier_id" bun:"supplier_id"`
+		Supplier          *SuppliersResponse         `bun:"rel:belongs-to,join:supplier_id=supplier_id"`
+		Quantity          int                        `json:"quantity" bun:"quantity"`
+		DateCreated       string                     `json:"date_created" bun:"date_created"`
 	}
 
 	ProductsQuery struct {
@@ -66,6 +68,19 @@ type (
 		ToQuantity        string   `json:"to_quantity"`
 		Limit             int      `json:"limit"`
 		Offset            int      `json:"offset"`
+		Order             string   `json:"order"`
+		Sort              string   `json:"sort"`
+	}
+
+	ProductsPage struct {
+		Products   []ProductsResponse `json:"products"`
+		NextCursor *Cursor            `json:"next_cursor,omitempty"`
+	}
+
+	// Cursor represents the composite cursor for pagination.
+	Cursor struct {
+		DateCreated string `json:"date_created"`
+		ProductId   string `json:"product_id"`
 	}
 )
 

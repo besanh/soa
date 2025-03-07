@@ -95,12 +95,18 @@ func (repo *Products) Select(ctx context.Context, filter *models.ProductsQuery) 
 	result := new([]models.ProductsResponse)
 	query := PgSqlClient.GetDB().NewSelect().Model(result).
 		Relation("ProductCategory", func(sq *bun.SelectQuery) *bun.SelectQuery {
-			return sq.Where("status = ?", "active").
-				Where("product_categories_uuid = IN (?)", bun.In(filter.ProductCategoryId))
+			// sq = sq.Where("pc.status = ?", "active")
+			if len(filter.ProductCategoryId) > 0 {
+				sq.Where("product_categories_uuid = IN (?)", bun.In(filter.ProductCategoryId))
+			}
+			return sq
 		}).
 		Relation("Supplier", func(sq *bun.SelectQuery) *bun.SelectQuery {
-			return sq.Where("status = ?", "active").
-				Where("suppliers_uuid = IN (?)", bun.In(filter.SupplierId))
+			// sq = sq.Where("sp.status = ?", "active")
+			if len(filter.SupplierId) > 0 {
+				sq.Where("suppliers_uuid = IN (?)", bun.In(filter.SupplierId))
+			}
+			return sq
 		})
 
 	if len(filter.ProductName) > 0 {
@@ -140,7 +146,28 @@ func (repo *Products) Select(ctx context.Context, filter *models.ProductsQuery) 
 		query.Limit(filter.Limit).Offset(filter.Offset)
 	}
 
-	query.Order("created_at desc")
+	orderValue := "date_created"
+	sortValue := "DESC"
+	switch filter.Order {
+	case "product_name":
+		orderValue = "product_name"
+	case "product_reference":
+		orderValue = "product_reference"
+	case "date_created":
+		orderValue = "date_created"
+	case "status":
+		orderValue = "u.username"
+	case "price":
+		orderValue = "p.id"
+	case "stock_location":
+		orderValue = "stock_location"
+	case "quantity":
+		orderValue = "quantity"
+	}
+	if len(filter.Sort) > 0 && filter.Sort == "asc" {
+		sortValue = "ASC"
+	}
+	query.OrderExpr(orderValue + " " + sortValue)
 
 	total, err := query.ScanAndCount(ctx)
 	if err != nil {
@@ -156,12 +183,18 @@ func (repo *Products) SelectScroll(ctx context.Context, filter *models.ProductsQ
 	result := new([]models.ProductsResponse)
 	query := PgSqlClient.GetDB().NewSelect().Model(result).
 		Relation("ProductCategory", func(sq *bun.SelectQuery) *bun.SelectQuery {
-			return sq.Where("status = ?", "active").
-				Where("product_categories_uuid = IN (?)", bun.In(filter.ProductCategoryId))
+			// sq = sq.Where("pc.status = ?", "active")
+			if len(filter.ProductCategoryId) > 0 {
+				sq.Where("product_categories_uuid = IN (?)", bun.In(filter.ProductCategoryId))
+			}
+			return sq
 		}).
 		Relation("Supplier", func(sq *bun.SelectQuery) *bun.SelectQuery {
-			return sq.Where("status = ?", "active").
-				Where("suppliers_uuid = IN (?)", bun.In(filter.SupplierId))
+			// sq = sq.Where("sp.status = ?", "active")
+			if len(filter.SupplierId) > 0 {
+				sq.Where("suppliers_uuid = IN (?)", bun.In(filter.SupplierId))
+			}
+			return sq
 		})
 
 	if len(filter.ProductName) > 0 {
@@ -201,8 +234,10 @@ func (repo *Products) SelectScroll(ctx context.Context, filter *models.ProductsQ
 		query.Limit(filter.Limit)
 	}
 
-	query.Where("(created_at > ?) OR (created_at = ? AND id > ?)", filter.CreatedAt, filter.CreatedAt, filter.LastSeenId).
-		Order("created_at ASC, id ASC")
+	if len(filter.LastSeenId) > 0 && len(filter.CreatedAt) > 0 {
+		query.Where("(date_created > ?) OR (date_created = ? AND product_id > ?)", filter.CreatedAt, filter.CreatedAt, filter.LastSeenId).
+			Order("date_created ASC, id ASC")
+	}
 
 	// I forgot order columns
 

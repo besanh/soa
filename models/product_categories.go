@@ -9,7 +9,7 @@ import (
 
 type (
 	ProductCategories struct {
-		bun.BaseModel       `bun:"product_categories,alias:pc"`
+		bun.BaseModel       `bun:"product_category,alias:pc"`
 		ProductCategoryId   string `json:"product_category_id" bun:"product_category_id,pk,type:uuid,notnull"`
 		ProductCategoryName string `json:"product_category_name" bun:"product_category_name,type:varchar(255),notnull"`
 		Status              string `json:"status" bun:"status,type:varchar(25),notnull"`
@@ -23,8 +23,8 @@ type (
 	}
 
 	ProductCategoriesResponse struct {
-		bun.BaseModel       `bun:"product_categories,alias:pc"`
-		ProductCategoryId   string `json:"product_category_id" bun:"product_category_id"`
+		bun.BaseModel       `bun:"product_category,alias:pc"`
+		ProductCategoryId   string `json:"product_category_id" bun:"product_category_id,pk"`
 		ProductCategoryName string `json:"product_category_name" bun:"product_category_name"`
 		Status              string `json:"status" bun:"status"`
 		CreatedAt           string `json:"created_at" bun:"created_at"`

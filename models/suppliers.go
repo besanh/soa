@@ -22,7 +22,7 @@ type (
 
 	SuppliersResponse struct {
 		bun.BaseModel `bun:"supplier,alias:sp"`
-		SupplierId    string `json:"supplier_id" bun:"supplier_id"`
+		SupplierId    string `json:"supplier_id" bun:"supplier_id,pk"`
 		SupplierName  string `json:"supplier_name" bun:"supplier_name"`
 		Status        string `json:"status" bun:"status"`
 	}

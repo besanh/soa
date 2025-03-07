@@ -20,7 +20,7 @@ type (
 		Delete(ctx context.Context, id string) error
 		Select(ctx context.Context, query *models.ProductsQuery) (total int, result []models.ProductsResponse, err error)
 		SelectById(ctx context.Context, id string) (result models.ProductsResponse, err error)
-		SelectScroll(ctx context.Context, query *models.ProductsQuery) (result []models.ProductsResponse, err error)
+		SelectScroll(ctx context.Context, query *models.ProductsQuery) (result *models.ProductsPage, err error)
 		ExportPdf(ctx context.Context, query *models.ProductsQuery) (*gofpdf.Fpdf, error)
 	}
 
@@ -45,6 +45,32 @@ func (p *Products) Insert(ctx context.Context, data *models.ProductsRequest) err
 		return err
 	} else if total > 0 {
 		return errors.New("product already exists")
+	}
+
+	// Get category
+	total, _, err = repositories.ProductCategoryRepo.Select(ctx, &models.ProductCategoriesQuery{
+		ProductCategoryId: data.ProductCategoryId,
+		Limit:             1,
+		Offset:            0,
+	})
+	if err != nil {
+		log.Errorf("failed to get product categories: %v", err)
+		return err
+	} else if total <= 0 {
+		return errors.New("product category not found")
+	}
+
+	// Get supplier
+	total, _, err = repositories.SupplierRepo.Select(ctx, &models.SuppliersQuery{
+		SupplierId: data.SupplierId,
+		Limit:      1,
+		Offset:     0,
+	})
+	if err != nil {
+		log.Errorf("failed to get suppliers: %v", err)
+		return err
+	} else if total <= 0 {
+		return errors.New("supplier not found")
 	}
 
 	product := &models.Products{
@@ -122,14 +148,33 @@ func (p *Products) Delete(ctx context.Context, id string) error {
  * Use basic case query
  */
 func (p *Products) Select(ctx context.Context, query *models.ProductsQuery) (total int, result []models.ProductsResponse, err error) {
+	// TODO: Apply caching from Redis to optimize performance
+
 	return repositories.ProductRepo.Select(ctx, query)
 }
 
 /*
  * Use scroll, optimizing performance
  */
-func (p *Products) SelectScroll(ctx context.Context, query *models.ProductsQuery) (result []models.ProductsResponse, err error) {
-	return repositories.ProductRepo.SelectScroll(ctx, query)
+func (p *Products) SelectScroll(ctx context.Context, query *models.ProductsQuery) (result *models.ProductsPage, err error) {
+	// TODO: Apply caching from Redis to optimize performance
+	products, err := repositories.ProductRepo.SelectScroll(ctx, query)
+	if err != nil {
+		return
+	}
+	var nextCursor *models.Cursor
+	if len(products) > 0 {
+		// Set the next cursor to the last record in the current page.
+		lastProduct := products[len(products)-1]
+		nextCursor = &models.Cursor{
+			DateCreated: lastProduct.DateCreated,
+			ProductId:   lastProduct.ProductId,
+		}
+	}
+	return &models.ProductsPage{
+		Products:   products,
+		NextCursor: nextCursor,
+	}, nil
 }
 
 func (p *Products) ExportPdf(ctx context.Context, query *models.ProductsQuery) (*gofpdf.Fpdf, error) {
