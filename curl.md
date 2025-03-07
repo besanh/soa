@@ -81,7 +81,7 @@ curl --location 'http://localhost:8000/v1/products' \
 7. Get distance
 
 ```
-curl --location 'http://localhost:8000/v1/distance' \
+curl --location 'http://localhost:8000/v1/distance?ip=8.8.8.8&city=New%20York' \
 --header 'Authorization: 8HsicGYxLnf9xNmFjF5WuRgu1VHwcktDLQIR6EPMs8kTwJlBgT'
 ```
 
