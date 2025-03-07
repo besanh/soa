@@ -1,6 +1,8 @@
 package v1
 
 import (
+	"net/http"
+
 	api "github.com/besanh/soa/apis"
 	"github.com/besanh/soa/common/util"
 	"github.com/besanh/soa/models"
@@ -24,6 +26,7 @@ func NewProduct(engine *gin.Engine, productsService services.IProducts) {
 		group.DELETE(":id", handler.Delete)
 		group.GET("", handler.Select)
 		group.GET("scroll", handler.SelectScroll)
+		group.POST("export-pdf", handler.ExportPdf)
 	}
 }
 
@@ -105,7 +108,7 @@ func (h *ProductsHandler) Select(ctx *gin.Context) {
 }
 
 func (h *ProductsHandler) SelectScroll(ctx *gin.Context) {
-	limit, offset := util.GetLimitOffset(ctx.Query("limit"), ctx.Query("offset"))
+	limit, _ := util.GetLimitOffset(ctx.Query("limit"), "")
 
 	query := &models.ProductsQuery{
 		LastSeenId:        ctx.Query("last_seen_id"),
@@ -122,7 +125,6 @@ func (h *ProductsHandler) SelectScroll(ctx *gin.Context) {
 		FromQuantity:      ctx.Query("from_quantity"),
 		ToQuantity:        ctx.Query("to_quantity"),
 		Limit:             limit,
-		Offset:            offset,
 	}
 
 	total, result, err := h.productsService.Select(ctx, query)
@@ -135,4 +137,36 @@ func (h *ProductsHandler) SelectScroll(ctx *gin.Context) {
 		"total": total,
 		"data":  result,
 	})
+}
+
+func (h *ProductsHandler) ExportPdf(ctx *gin.Context) {
+	limit, _ := util.GetLimitOffset(ctx.Query("limit"), "")
+
+	query := &models.ProductsQuery{
+		LastSeenId:        ctx.Query("last_seen_id"),
+		CreatedAt:         ctx.Query("created_at"),
+		ProductName:       ctx.Query("product_name"),
+		ProductReference:  ctx.Query("product_reference"),
+		Status:            util.ParseQueryArray(ctx.QueryArray("status")),
+		ProductCategoryId: util.ParseQueryArray(ctx.QueryArray("product_category_id")),
+		SupplierId:        util.ParseQueryArray(ctx.QueryArray("supplier_id")),
+		FromDateCreated:   ctx.Query("from_date_created"),
+		ToDateCreated:     ctx.Query("to_date_created"),
+		FromPrice:         ctx.Query("from_price"),
+		ToPrice:           ctx.Query("to_price"),
+		FromQuantity:      ctx.Query("from_quantity"),
+		ToQuantity:        ctx.Query("to_quantity"),
+		Limit:             limit,
+	}
+
+	pdf, err := h.productsService.ExportPdf(ctx, query)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Write the PDF to the response.
+	if err := pdf.Output(ctx.Writer); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
 }

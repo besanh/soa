@@ -3,12 +3,14 @@ package services
 import (
 	"context"
 	"errors"
+	"strconv"
 	"time"
 
 	"github.com/besanh/soa/common/log"
 	"github.com/besanh/soa/models"
 	"github.com/besanh/soa/repositories"
 	"github.com/google/uuid"
+	"github.com/jung-kurt/gofpdf"
 )
 
 type (
@@ -18,6 +20,7 @@ type (
 		Delete(ctx context.Context, id string) error
 		Select(ctx context.Context, query *models.ProductsQuery) (total int, result []models.ProductsResponse, err error)
 		SelectScroll(ctx context.Context, query *models.ProductsQuery) (result []models.ProductsResponse, err error)
+		ExportPdf(ctx context.Context, query *models.ProductsQuery) (*gofpdf.Fpdf, error)
 	}
 
 	Products struct {
@@ -114,10 +117,63 @@ func (p *Products) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
+/*
+ * Use basic case query
+ */
 func (p *Products) Select(ctx context.Context, query *models.ProductsQuery) (total int, result []models.ProductsResponse, err error) {
 	return repositories.ProductRepo.Select(ctx, query)
 }
 
+/*
+ * Use scroll, optimizing performance
+ */
 func (p *Products) SelectScroll(ctx context.Context, query *models.ProductsQuery) (result []models.ProductsResponse, err error) {
 	return repositories.ProductRepo.SelectScroll(ctx, query)
+}
+
+func (p *Products) ExportPdf(ctx context.Context, query *models.ProductsQuery) (*gofpdf.Fpdf, error) {
+	products, err := repositories.ProductRepo.SelectScroll(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.AddPage()
+
+	// Title.
+	pdf.SetFont("Arial", "B", 16)
+	pdf.Cell(40, 10, "Product Information")
+	pdf.Ln(12)
+
+	// Table header.
+	pdf.SetFont("Arial", "B", 12)
+	pdf.CellFormat(10, 10, "#", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(80, 10, "Product Reference", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(80, 10, "Product Name", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(80, 10, "Date Added", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(80, 10, "Status", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(80, 10, "Product Category", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(80, 10, "Price", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(80, 10, "Stock Location(city)", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(80, 10, "Supplier", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(80, 10, "Available Quantity", "1", 0, "C", false, 0, "")
+	pdf.Ln(-1)
+
+	// Table rows.
+	pdf.SetFont("Arial", "", 12)
+	for i, p := range products {
+		pdf.CellFormat(10, 10, strconv.Itoa(i+1), "1", 0, "C", false, 0, "")
+		pdf.CellFormat(80, 10, p.ProductReference, "1", 0, "L", false, 0, "")
+		pdf.CellFormat(80, 10, p.ProductName, "1", 0, "L", false, 0, "")
+		pdf.CellFormat(80, 10, p.DateCreated, "1", 0, "C", false, 0, "")
+		pdf.CellFormat(80, 10, p.Status, "1", 0, "C", false, 0, "")
+		pdf.CellFormat(80, 10, p.ProductCategory.ProductCategoryName, "1", 0, "L", false, 0, "")
+		pdf.CellFormat(80, 10, strconv.FormatInt(p.Price, 10), "1", 0, "R", false, 0, "")
+		pdf.CellFormat(80, 10, p.StockLocation, "1", 0, "L", false, 0, "")
+		pdf.CellFormat(80, 10, p.Supplier.SupplierName, "1", 0, "L", false, 0, "")
+		pdf.CellFormat(80, 10, strconv.Itoa(p.Quantity), "1", 0, "C", false, 0, "")
+		pdf.Ln(-1)
+	}
+
+	return pdf, nil
 }

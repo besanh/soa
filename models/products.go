@@ -16,7 +16,7 @@ type (
 		Status            string            `json:"status" bun:"status,type:varchar(25),notnull"`
 		ProductCategoryId string            `json:"product_category_id" bun:"product_category_id,type:uuid,notnull"`
 		ProductCategory   ProductCategories `json:"-" bun:"rel:belongs-to,join:product_category_id=product_category_id"`
-		Price             int               `json:"price" bun:"price,type:int,notnull"`
+		Price             int64             `json:"price" bun:"price,type:int,notnull"`
 		StockLocation     string            `json:"stock_location" bun:"stock_location,type:varchar(100),notnull"`
 		SupplierId        string            `json:"supplier_id" bun:"supplier_id,type:uuid,notnull"`
 		Supplier          Suppliers         `json:"-" bun:"rel:belongs-to,join:supplier_id=supplier_id"`
@@ -29,7 +29,7 @@ type (
 		ProductReference  string `json:"product_reference" form:"product_reference" binding:"required"`
 		Status            string `json:"status" form:"status" binding:"required"`
 		ProductCategoryId string `json:"product_category_id" form:"product_category_id" binding:"required"`
-		Price             int    `json:"price" form:"price" binding:"required"`
+		Price             int64  `json:"price" form:"price" binding:"required"`
 		StockLocation     string `json:"stock_location" form:"stock_location" binding:"required"`
 		SupplierId        string `json:"supplier_id" form:"supplier_id" binding:"required"`
 		Quantity          int    `json:"quantity" form:"quantity" binding:"required"`
@@ -42,7 +42,7 @@ type (
 		ProductReference string                     `json:"product_reference" bun:"product_reference"`
 		Status           string                     `json:"status" bun:"status"`
 		ProductCategory  *ProductCategoriesResponse `bun:"rel:belongs-to,join:product_category_id=product_category_id"`
-		Price            int                        `json:"price" bun:"price"`
+		Price            int64                      `json:"price" bun:"price"`
 		StockLocation    string                     `json:"stock_location" bun:"stock_location"`
 		Supplier         *SuppliersResponse         `bun:"rel:belongs-to,join:supplier_id=supplier_id"`
 		Quantity         int                        `json:"quantity" bun:"quantity"`
