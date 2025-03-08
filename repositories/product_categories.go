@@ -6,6 +6,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/besanh/soa/common/log"
 	"github.com/besanh/soa/models"
 )
 
@@ -45,12 +46,12 @@ func (repo *ProductCategoies) initColumns() {
 }
 
 func (repo *ProductCategoies) initIndexes() {
-	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-	// defer cancel()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
 
-	// if _, err := PgSqlClient.GetDB().NewCreateIndex().Model((*models.ProductCategories)(nil)).IfNotExists().Index("idx_product_categories_combination").Column("product_category_name", "status").Exec(ctx); err != nil {
-	// 	panic(err)
-	// }
+	if _, err := PgSqlClient.GetDB().NewCreateIndex().Model((*models.ProductCategories)(nil)).IfNotExists().Index("idx_product_categories_combination").Column("product_category_name", "status").Exec(ctx); err != nil {
+		log.Errorf("failed to create index: %v", err)
+	}
 }
 
 func (repo *ProductCategoies) Insert(ctx context.Context, data *models.ProductCategories) error {

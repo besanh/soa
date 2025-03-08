@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/besanh/soa/common/log"
 	"github.com/besanh/soa/models"
 	"github.com/uptrace/bun"
 )
@@ -49,12 +50,12 @@ func (repo *Products) initColumns() {
 }
 
 func (repo *Products) initIndexes() {
-	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-	// defer cancel()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
 
-	// if _, err := PgSqlClient.GetDB().NewCreateIndex().Model((*models.Products)(nil)).IfNotExists().Index("idx_products_combination").Column("product_name", "product_reference", "status", "date_created", "price", "quantity").Exec(ctx); err != nil {
-	// 	panic(err)
-	// }
+	if _, err := PgSqlClient.GetDB().NewCreateIndex().Model((*models.Products)(nil)).IfNotExists().Index("idx_products_combination").Column("product_name", "product_reference", "status", "date_created", "price", "quantity").Exec(ctx); err != nil {
+		log.Errorf("failed to create index: %v", err)
+	}
 }
 
 func (repo *Products) Insert(ctx context.Context, data *models.Products) error {
@@ -182,14 +183,12 @@ func (repo *Products) SelectScroll(ctx context.Context, filter *models.ProductsQ
 	result := new([]models.ProductsResponse)
 	query := PgSqlClient.GetDB().NewSelect().Model(result).
 		Relation("ProductCategory", func(sq *bun.SelectQuery) *bun.SelectQuery {
-			// sq = sq.Where("pc.status = ?", "active")
 			if len(filter.ProductCategoryId) > 0 {
 				sq.Where("product_categories_uuid = IN (?)", bun.In(filter.ProductCategoryId))
 			}
 			return sq
 		}).
 		Relation("Supplier", func(sq *bun.SelectQuery) *bun.SelectQuery {
-			// sq = sq.Where("sp.status = ?", "active")
 			if len(filter.SupplierId) > 0 {
 				sq.Where("suppliers_uuid = IN (?)", bun.In(filter.SupplierId))
 			}

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/besanh/soa/common/log"
 	"github.com/besanh/soa/models"
 )
 
@@ -45,12 +46,12 @@ func (repo *Suppliers) initColumns() {
 }
 
 func (repo *Suppliers) initIndexes() {
-	// ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-	// defer cancel()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
 
-	// if _, err := PgSqlClient.GetDB().NewCreateIndex().Model((*models.Suppliers)(nil)).IfNotExists().Index("idx_suppliers_combination").Column("supplier_name", "status").Exec(ctx); err != nil {
-	// 	panic(err)
-	// }
+	if _, err := PgSqlClient.GetDB().NewCreateIndex().Model((*models.Suppliers)(nil)).IfNotExists().Index("idx_suppliers_combination").Column("supplier_name", "status").Exec(ctx); err != nil {
+		log.Errorf("failed to create index: %v", err)
+	}
 }
 
 func (repo *Suppliers) Insert(ctx context.Context, data *models.Suppliers) error {
